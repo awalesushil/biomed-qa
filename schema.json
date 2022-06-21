@@ -1,0 +1,58 @@
+{
+    "settings": {
+        "number_of_shards": 5,
+        "number_of_replicas": 1,
+        "index": {
+            "analysis": {
+                "analyzer": {
+                    "custom_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": [
+                            "lowercase",
+                            "custom_stopwords"
+                        ]
+                    }
+                },
+                "filter": {
+                    "custom_stopwords": {
+                        "type": "stop",
+                        "stopwords": "_english_"
+                    }
+                }
+            }
+        }
+    },
+    "mappings": {
+        "dynamic": false,
+        "properties": {
+            "id": {"type": "keyword"},
+            "uuid": {"type": "keyword"},
+            "title": {"type": "text"},
+            "doi": {"type": "text"},
+            "authors": {
+                "type": "nested",
+                "properties": {
+                    "name": {"type":"text"},
+                    "institution": {"type":"text"}
+                }
+            },
+            "abstract": {"type": "text", "analyzer": "custom_analyzer"},
+            "text": {"type": "text", "analyzer": "custom_analyzer"},
+            "fields": {
+                "type": "nested",
+                "properties": {
+                    "field_uid": {"type": "keyword"},
+                    "value": {
+                        "type": "text", 
+                        "fields": {
+                            "raw": {
+                                "type": "keyword"
+                            }
+                        }
+                    }
+                } 
+            } 
+        }
+    }
+}

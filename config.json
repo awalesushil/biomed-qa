@@ -1,0 +1,7 @@
+{
+    "host": "elasticsearch",
+    "username": "user",
+    "password": "password",
+    "port": "9200",
+    "index": "pubmed"
+}
