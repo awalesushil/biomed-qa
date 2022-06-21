@@ -133,7 +133,20 @@ class ElasticsearchClient:
         _results  = self.conn.search(index=self.index, query=query, size=10000, _source_includes=key)
         results = self.__process_result(_results)
         return results
-    
+
+    def format_doc(self, doc):
+
+        _doc = {"field":[]}
+        
+        for k, v in doc.items():
+            if k in ['title','text']:
+                _doc[k] = v
+            else:
+                field = {"field_uid":k,"value":v}
+                _doc["field"].append(field)
+
+        return _doc
+
     def load(self, datapath):
         '''
             Bulk load all the data into index
@@ -161,7 +174,6 @@ class ElasticsearchClient:
         for doc in data:
             if '{"index"' not in doc:
                 yield {
-                    "_id": uuid.uuid4(),
                     "_index": self.index,
                     "_source": self.format_doc(json.loads(doc))
                 }

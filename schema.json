@@ -26,18 +26,7 @@
     "mappings": {
         "dynamic": false,
         "properties": {
-            "id": {"type": "keyword"},
-            "uuid": {"type": "keyword"},
             "title": {"type": "text"},
-            "doi": {"type": "text"},
-            "authors": {
-                "type": "nested",
-                "properties": {
-                    "name": {"type":"text"},
-                    "institution": {"type":"text"}
-                }
-            },
-            "abstract": {"type": "text", "analyzer": "custom_analyzer"},
             "text": {"type": "text", "analyzer": "custom_analyzer"},
             "fields": {
                 "type": "nested",
