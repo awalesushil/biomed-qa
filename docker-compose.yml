@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  web:
+    container_name: "biomedqa"
+    build: .
+    working_dir: /code/app
+    command: uvicorn main:app --host 0.0.0.0 --reload
+    environment:
+      DEBUG: 1
+    volumes:
+      - ./app:/code/app
+    ports:
+      - 8000:8000
+    restart: on-failure
+
+  elasticsearch:
+    image: "elasticsearch:7.3.0"
+    environment:
+      - node.name=elasticsearch
+      - discovery.seed_hosts=elasticsearch
+      - cluster.initial_master_nodes=elasticsearch
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearchdata:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+volumes:
+  elasticsearchdata: {}
