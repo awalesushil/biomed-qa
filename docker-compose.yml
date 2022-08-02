@@ -4,8 +4,8 @@ services:
   web:
     container_name: "biomedqa"
     build: .
-    working_dir: /code/app
-    command: uvicorn main:app --host 0.0.0.0 --reload
+    working_dir: /code/src
+    command: uvicorn main:src --host 0.0.0.0 --reload
     environment:
       DEBUG: 1
     volumes:

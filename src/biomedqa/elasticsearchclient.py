@@ -1,10 +1,15 @@
+"""
+        Elasticsearch client to store and retrieve data from Elasticsearch
+"""
 import json
 
 from elasticsearch import Elasticsearch, helpers
 
 
 class ElasticsearchClient:
-
+    """
+        Elasticsearch client to store and retrieve data from Elasticsearch
+    """
     def __init__(self, config):
         '''
             Create an Elasticsearch Python client
@@ -32,52 +37,51 @@ class ElasticsearchClient:
             self.index = index
         else:
             try:
-                schema = json.load(open(schema_path, "r"))
+                schema = json.load(open(schema_path, "r", encoding="utf-8"))
                 self.conn.indices.create(index=index, body=schema)
                 print("Created a new index with name " + index)
                 self.index = index
-            except Exception as e:
-                print("Error === ", e)
-    
+            except Exception as err:
+                print("Error === ", err)
 
-    def get(self, id):
+
+    def get(self, doc_id):
         '''
             Returns a single document from the index with the identifier id
             @params:
-                id: Id of the document to be retrieved
+                doc_id: Id of the document to be retrieved
         '''
-        result = self.conn.get(index=self.config['index'], id=id)
+        result = self.conn.get(index=self.config['index'], id=doc_id)
 
         doc = {
-            "id": id,
+            "doc_id": id,
             "_source": result['_source']
         }
 
         return doc
 
 
-    def insert(self, doc, id):
+    def insert(self, doc, doc_id):
         '''
             Adds new document to the index
             @params:
                 doc: New document to be added to the index
-                id: Id for the document to be added
+                doc_id: Id for the document to be added
         '''
         try:
-            self.conn.create(index=self.index, body=doc, id=id)
-        except Exception as e:
-            print("Exception === ", e)
-    
+            self.conn.create(index=self.index, body=doc, id=doc_id)
+        except Exception as err:
+            print("Exception === ", err)
+
 
     def __build_query(self, keys=None, values=None, func=None):
 
         _mappings = self.conn.indices.get_mapping(self.index)
         _properties = _mappings[self.index]["mappings"]["properties"]
-        
+
         if keys is not None:
 
             _keys = self.__parse_keys(keys)
-            
             query = {"bool":{"must":[]}}
 
             index_list = []
@@ -91,26 +95,26 @@ class ElasticsearchClient:
                             "query":{"bool":{"must": []}}}
                         }
                     query["bool"]["must"].append(nested_query)
-            
-            for k, v in zip(keys, values):
-                key_label = k.split(".")[0]
+
+            for key, val in zip(keys, values):
+                key_label = key.split(".")[0]
                 if _properties[key_label]["type"] == "nested":
-                    match = {func: {k: v}}
-                    query['bool']['must'][index_list.index(key_label)]['nested']['query']['bool']['must'].append(
+                    match = {func: {k: val}}
+                    index = index_list.index(key_label)
+                    query['bool']['must'][index]['nested']['query']['bool']['must'].append(
                         match
                     )
                 else:
-                    match = {func: {k: v}}
+                    match = {func: {key: val}}
                     query['bool']['must'].append(match)
         else:
             query = {"match_all":{}}
-        
         return query
 
 
     def __parse_keys(self, keys):
         _keys_dict = {k.split(".")[0]: [] for k in keys}
-        
+
         for key in [k.split(".") for k in keys]:
             if len(key) > 1:
                 _keys_dict[key[0]].append(key[1])
@@ -137,45 +141,50 @@ class ElasticsearchClient:
                 key: Only retreive documents with selected key
         '''
         query = self.__build_query(where, values, func="match")
-        _results  = self.conn.search(index=self.index, query=query, size=10000, _source_includes=key)
+        _results  = self.conn.search(index=self.index, body=query)
         results = self.__process_result(_results)
         return results
 
     def format_doc(self, doc):
-
+        """
+            Format the document to be inserted into the index
+        """
         _doc = {"field":[]}
-        
-        for k, v in doc.items():
-            if k in ['title','body','abstract']:
-                _doc[k] = v
+
+        for key, val in doc.items():
+            if key in ['title','body','abstract']:
+                _doc[key] = val
             else:
-                field = {"field_uid":k,"value":v}
+                field = {"field_uid": key,"value": val}
                 _doc["field"].append(field)
         return _doc
 
-    def load(self, data):
+
+    def load(self, datapath):
         '''
             Bulk load all the data into index
             @params:
                 data: data
         '''
-        generator = self.__generator(data)
-    
+        generator = self.__generator(datapath)
         try:
             helpers.bulk(self.conn, generator, self.index)
             print("Data loading successfull")
-        except Exception as e:
-            print("Error === ", e)
-    
-    
-    def __generator(self, data):
+        except Exception as err:
+            print("Error === ", err)
+
+    def __generator(self, datapath):
         '''
             Returns a single line of data without loading document into memory
             @params:
                 data:   list of data
         '''
-        for doc in data:
-            yield {
-                "_index": self.index,
-                "_source": self.format_doc(doc)
-            }
+        # Load data from JSON file
+        with open(datapath, encoding="utf-8") as f:
+            data = f.read()
+            data = "[" + data.replace("}{", "},{") + "]"
+            for doc in data:
+                yield {
+                    "_index": self.index,
+                    "_source": self.format_doc(doc)
+                }
