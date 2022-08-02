@@ -1,22 +1,30 @@
+"""
+    FAST Api app
+"""
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from queryformulator.QueryFormulator import QueryFormulator
-from retriever.Retriever import Retriever
-from qamodel.QAModel import QAModel
+from sentence_transformers import SentenceTransformer
+
+from src.biomedqa.queryformulator import QueryFormulator
+from src.biomedqa.retriever import Retriever
+from src.biomedqa.qamodel import QAModel
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="/code/app/static"), name="static")
-        
+
+passage_model = SentenceTransformer("msmarco-bert-base-dot-v5")
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-
+    """
+        Home page
+    """
     queryForumulator = QueryFormulator()
-    retriever = Retriever()
+    retriever = Retriever(passage_model)
     qamodel = QAModel()
 
     params = request.query_params

@@ -96,7 +96,7 @@ class Extractor:
                 doc_dict['id'] = file.split('.')[0]
                 doc_dict = self.extract_metadata(document.find('front'))
                 doc_dict['abstract'] = self.__extract_paragraphs(document.find('abstract'))
-                doc_dict['content'] = self.__extract_paragraphs(document.find('body'))
+                doc_dict['body'] = self.__extract_paragraphs(document.find('body'))
                 yield doc_dict
 
 

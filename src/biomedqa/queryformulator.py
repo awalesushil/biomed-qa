@@ -1,5 +1,10 @@
+"""
+    Query Formulator Model
+"""
 class QueryFormulator:
-
+    """
+        Query Formulator Model
+    """
     def __init__(self):
         pass
 

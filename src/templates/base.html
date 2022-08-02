@@ -98,23 +98,23 @@
         <script type="text/javascript">
             document.getElementById("search-bar-wrapper").style.margin = 0;
 
-            $(document).ready(function() {
-                const term = document.getElementById('query').placeholder; // search query we want to highlight in results 
+            // $(document).ready(function() {
+                // const term = document.getElementById('query').placeholder; // search query we want to highlight in results 
                 
-                Array.from(document.getElementsByClassName("display-title")).forEach(
-                    function(element, index, array) {
-                        changed = element.innerText.replace(new RegExp(term, "gi"), (match) => `<span class="highlight">${match}</span>`);
-                        element.innerHTML = changed;
-                    }
-                );
+                // Array.from(document.getElementsByClassName("display-title")).forEach(
+                //     function(element, index, array) {
+                //         changed = element.innerText.replace(new RegExp(term, "gi"), (match) => `<span class="highlight">${match}</span>`);
+                //         element.innerHTML = changed;
+                //     }
+                // );
 
-                Array.from(document.getElementsByClassName("display-text")).forEach(
-                    function(element, index, array) {
-                        changed = element.innerText.replace(new RegExp(term, "gi"), (match) => `<span class="highlight">${match}</span>`);
-                        element.innerHTML = changed;
-                    }
-                );
-            });
+                // Array.from(document.getElementsByClassName("display-text")).forEach(
+                //     function(element, index, array) {
+                //         changed = element.innerText.replace(new RegExp(term, "gi"), (match) => `<span class="highlight">${match}</span>`);
+                //         element.innerHTML = changed;
+                //     }
+                // );
+            // });
         </script>
     {% endif %}
     {% endblock %}

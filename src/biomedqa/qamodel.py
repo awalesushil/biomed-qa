@@ -1,5 +1,10 @@
+"""
+    Question Answering Model
+"""
 class QAModel:
-
+    """
+        Question Answering Model
+    """
     def __init__(self):
         pass
 
