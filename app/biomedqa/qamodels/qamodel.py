@@ -9,4 +9,7 @@ class QAModel:
         pass
 
     def get_answers(self, passages):
+        """
+            Get answers from passages
+        """
         raise NotImplementedError

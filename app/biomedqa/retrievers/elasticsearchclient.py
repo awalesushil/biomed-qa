@@ -3,7 +3,7 @@
 """
 import json
 
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import Elasticsearch, ElasticsearchException, helpers
 
 
 class ElasticsearchClient:
@@ -18,11 +18,15 @@ class ElasticsearchClient:
         '''
         self.conn = Elasticsearch(
                                 [config['host']],
-                                http_auth=(config['username'], config['password']), 
+                                http_auth=(config['username'], config['password']),
                                 port = config['port'],
                                 timeout=300)
         self.config = config
-        self.index = config['index'] if 'index' in config.keys() else None
+        self.index = None
+        if 'index' in config.keys():
+            self.index = config['index']
+            mappings = self.conn.indices.get_mapping(self.index)
+            self.properties = mappings[self.index]["mappings"]["properties"]
 
 
     def create(self, index, schema_path):
@@ -41,7 +45,9 @@ class ElasticsearchClient:
                 self.conn.indices.create(index=index, body=schema)
                 print("Created a new index with name " + index)
                 self.index = index
-            except Exception as err:
+                mappings = self.conn.indices.get_mapping(self.index)
+                self.properties = mappings[self.index]["mappings"]["properties"]
+            except ElasticsearchException as err:
                 print("Error === ", err)
 
 
@@ -70,14 +76,11 @@ class ElasticsearchClient:
         '''
         try:
             self.conn.create(index=self.index, body=doc, id=doc_id)
-        except Exception as err:
+        except ElasticsearchException as err:
             print("Exception === ", err)
 
 
     def __build_query(self, keys=None, values=None, func=None):
-
-        _mappings = self.conn.indices.get_mapping(self.index)
-        _properties = _mappings[self.index]["mappings"]["properties"]
 
         if keys is not None:
 
@@ -87,7 +90,7 @@ class ElasticsearchClient:
             index_list = []
 
             for k in _keys:
-                if _properties[k]["type"] == "nested":
+                if self.properties[k]["type"] == "nested":
                     index_list.append(k)
                     nested_query = {
                         "nested":{
@@ -98,8 +101,8 @@ class ElasticsearchClient:
 
             for key, val in zip(keys, values):
                 key_label = key.split(".")[0]
-                if _properties[key_label]["type"] == "nested":
-                    match = {func: {k: val}}
+                if self.properties[key_label]["type"] == "nested":
+                    match = {func: {key: val}}
                     index = index_list.index(key_label)
                     query['bool']['must'][index]['nested']['query']['bool']['must'].append(
                         match
@@ -131,7 +134,7 @@ class ElasticsearchClient:
         return docs
 
 
-    def search(self, where=None, values=None, key=None):
+    def search(self, where=None, values=None):
         '''
             Retrieve all documents from the index that satisfies the key-value constraints
             If the key-value pairs are not specified then all documents are retrieved
@@ -170,7 +173,7 @@ class ElasticsearchClient:
         try:
             helpers.bulk(self.conn, generator, self.index)
             print("Data loading successfull")
-        except Exception as err:
+        except ElasticsearchException as err:
             print("Error === ", err)
 
     def __generator(self, datapath):
@@ -180,8 +183,8 @@ class ElasticsearchClient:
                 data:   list of data
         '''
         # Load data from JSON file
-        with open(datapath, encoding="utf-8") as f:
-            data = f.read()
+        with open(datapath, encoding="utf-8") as file:
+            data = file.read()
             data = "[" + data.replace("}{", "},{") + "]"
             for doc in data:
                 yield {
