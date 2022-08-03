@@ -3,10 +3,9 @@
 """
 import json
 
-from nltk.tokenize import sent_tokenize
 from sentence_transformers import util
 
-from elasticsearchclient import ElasticsearchClient
+from biomedqa.retrievers.elasticsearchclient import ElasticsearchClient
 
 
 class Retriever:
@@ -15,7 +14,7 @@ class Retriever:
     """
     def __init__(self, passage_model):
         self.conn = ElasticsearchClient(
-                    json.load(open("/code/app/retriever/config.json", encoding="utf-8"))
+                    json.load(open("/code/app/config.json", encoding="utf-8"))
                 )
         self.passage_model = passage_model
 
@@ -42,7 +41,7 @@ class Retriever:
         for doc in docs:
             title = doc["title"]
             full_text = doc["abstract"] + " " + doc["body"]
-            sentences = sent_tokenize(full_text)
+            sentences = full_text.split(".")
             passages.extend([(title, " ".join(sentences[i:i+passage_length])) \
                 for i in range(0, len(sentences), passage_length)])
 

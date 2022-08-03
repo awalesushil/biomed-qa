@@ -9,4 +9,8 @@ class QueryFormulator:
         pass
 
     def get_keywords(self, query):
+        """
+            Get keywords from query
+        """
         raise NotImplementedError
+        

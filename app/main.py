@@ -8,9 +8,9 @@ from fastapi.templating import Jinja2Templates
 
 from sentence_transformers import SentenceTransformer
 
-from src.biomedqa.queryformulator import QueryFormulator
-from src.biomedqa.retriever import Retriever
-from src.biomedqa.qamodel import QAModel
+from biomedqa.queryformulators.queryformulator import QueryFormulator
+from biomedqa.retrievers.retriever import Retriever
+from biomedqa.qamodels.qamodel import QAModel
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
