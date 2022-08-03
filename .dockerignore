@@ -1,0 +1,5 @@
+definitions/
+xml_data_dump/
+.env/
+.vscode/
+*.png
