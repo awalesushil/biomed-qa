@@ -3,10 +3,10 @@
 """
 import re
 import os
+from datetime import datetime
 
 from tqdm import tqdm
 from bs4 import BeautifulSoup
-
 
 class Extractor:
     """
@@ -45,7 +45,7 @@ class Extractor:
                     try:
                         first_name = each.find('given-names').text
                         last_name = each.find('surname').text
-                        author_list.append(first_name + ' ' + last_name)
+                        author_list.append({"name": first_name + ' ' + last_name})
                     except AttributeError:
                         pass
         return author_list
@@ -56,9 +56,11 @@ class Extractor:
         """
         if history:
             for date in history.find_all('date'):
-                if date.attrs['date-type'] == 'accepted':
-                    return date.day.text + '-' + date.month.text + '-' + date.year.text
-        return ''
+                if date and date.attrs['date-type'] == 'accepted':
+                    date_str = date.year.text + '-' + date.month.text + '-' + date.day.text
+                    date_str = datetime.strptime(date_str, "%Y-%m-%d").date()
+                    return date_str.isoformat()
+        return datetime.strptime('1900-01-01', "%Y-%m-%d").date().isoformat()
 
     def __extract_categories(self, categories):
         """
@@ -79,29 +81,49 @@ class Extractor:
         metadata_dict = {}
         metadata_dict['title'] = metadata.find('article-title').text
         metadata_dict['categories'] = self.__extract_categories(metadata.find('article-categories'))
-        metadata_dict['journal-title'] = metadata.find('journal-title').text
+        metadata_dict['journal_title'] = metadata.find('journal-title').text
         metadata_dict['authors'] = self.___extract_authors(metadata.find('contrib-group'))
-        metadata_dict['publication-date'] = self.__extract_date(metadata.find('history'))
+        metadata_dict['publication_date'] = self.__extract_date(metadata.find('history'))
         return metadata_dict
 
-    def extract(self):
+    def extract_to(self, index=None):
         """
             Extract text from PMC text dump
         """
+        index_id = 5001
         folders = os.listdir(self.path)
         for folder in folders:
-            for file in tqdm(os.listdir(os.path.join(self.path, folder))):
+            for file in tqdm(os.listdir(os.path.join(self.path, folder))[:200]):
+
                 file_path = os.path.join(self.path, folder, file)
-                document = BeautifulSoup(open(file_path, encoding="utf-8"), "html.parser")
-                doc_dict['id'] = file.split('.')[0]
+                with open(file_path, encoding="utf-8") as doc_file:
+                    document = BeautifulSoup(doc_file, "html.parser")
+
                 doc_dict = self.extract_metadata(document.find('front'))
-                doc_dict['abstract'] = self.__extract_paragraphs(document.find('abstract'))
-                doc_dict['body'] = self.__extract_paragraphs(document.find('body'))
-                yield doc_dict
+                doc_dict['pid'] = file.split('.')[0]
 
+                abstract_paragraphs = self.__extract_paragraphs(document.find('abstract'))
+                # Create new document for each abstract paragraph
+                for paragraph in abstract_paragraphs:
+                    if paragraph:
+                        doc_dict['body'] = paragraph
+                        doc_dict["id"] = index_id
+                        index_id = index_id + 1
+                        yield doc_dict if index is None else {
+                            "_id": doc_dict["id"],
+                            "_index": index,
+                            "_source": doc_dict
+                        }
 
-
-if __name__ == "__main__":
-    extractor = Extractor("xml_data_dump")
-    for doc in extractor.extract():
-        print(doc)
+                body_paragraphs = self.__extract_paragraphs(document.find('body'))
+                # Create new document for each body paragraph
+                for paragraph in body_paragraphs:
+                    if paragraph:
+                        doc_dict['body'] = paragraph
+                        doc_dict["id"] = index_id
+                        index_id = index_id + 1
+                        yield doc_dict if index is None else {
+                                "_id": doc_dict["id"],
+                                "_index": index,
+                                "_source": doc_dict
+                            }

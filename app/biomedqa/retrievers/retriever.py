@@ -6,16 +6,18 @@ import json
 from sentence_transformers import util
 
 from biomedqa.retrievers.elasticsearchclient import ElasticsearchClient
+from biomedqa.retrievers.hnswlib import HNSWlibRetriever
 
 
 class Retriever:
     """
         Retrieve passages from the index
     """
-    def __init__(self, passage_model):
-        self.conn = ElasticsearchClient(
-                    json.load(open("/code/app/config.json", encoding="utf-8"))
-                )
+    def __init__(self, model, passage_model=None):
+        with open("/code/app/config.json", encoding="utf-8") as config:
+            config = json.load(config)
+            self.conn = ElasticsearchClient(config)
+        self.model = model
         self.passage_model = passage_model
 
     def encode_passages(self, passages):
@@ -25,12 +27,6 @@ class Retriever:
         passages = [p[1] for p in passages]
         passages = self.passage_model.encode(passages, show_progress_bar=False)
         return passages
-
-    def bm25(self, keywords):
-        """
-            Elasticsearch BM25 retrieval
-        """
-        return self.conn.search(where=["abstract","title","body"], values=[keywords]*3)
 
     def tokenize(self, docs, passage_length=5):
         """
@@ -54,14 +50,8 @@ class Retriever:
         """
             Retrieve passages from the index
         """
-        docs = self.bm25(query)[:10]
-        titles, passages = self.tokenize(docs)
-        query_embeddings = self.passage_model.encode(query, convert_to_tensor=True)
-        passage_embeddings = self.encode_passages(passages)
-        hits = util.semantic_search(query_embeddings, passage_embeddings, top_k=10)[0]
-        passages = [
-                {"title": titles[hit["corpus_id"]],
-                "passage": passages[hit["corpus_id"]]} for hit in hits
-            ]
-
+        # hits = self.conn.search(where=["title","body"], values=[query]*2)
+        query_embedding = self.passage_model.encode([query])
+        labels, _ = self.model.search(query_embedding)
+        passages = [self.conn.get(label)['_source'] for label in labels[0]]
         return passages
