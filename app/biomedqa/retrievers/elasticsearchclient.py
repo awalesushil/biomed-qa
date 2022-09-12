@@ -1,6 +1,8 @@
 """
         Elasticsearch client to store and retrieve data from Elasticsearch
 """
+import os
+import uuid
 import json
 
 from elasticsearch import Elasticsearch, ElasticsearchException, helpers
@@ -24,9 +26,9 @@ class ElasticsearchClient:
         self.config = config
         self.index = None
         if 'index' in config.keys():
-            self.index = config['index']
-            mappings = self.conn.indices.get_mapping(self.index)
-            self.properties = mappings[self.index]["mappings"]["properties"]
+            self.create(config['index'], os.path.join("app/", config['schema']))
+        mappings = self.conn.indices.get_mapping(self.index)
+        self.properties = mappings[self.index]["mappings"]["properties"]
 
 
     def create(self, index, schema_path):
@@ -45,8 +47,6 @@ class ElasticsearchClient:
                 self.conn.indices.create(index=index, body=schema)
                 print("Created a new index with name " + index)
                 self.index = index
-                mappings = self.conn.indices.get_mapping(self.index)
-                self.properties = mappings[self.index]["mappings"]["properties"]
             except ElasticsearchException as err:
                 print("Error === ", err)
 
@@ -134,7 +134,7 @@ class ElasticsearchClient:
         return docs
 
 
-    def search(self, where=None, values=None):
+    def search(self, where=None, values=None, size=10000):
         '''
             Retrieve all documents from the index that satisfies the key-value constraints
             If the key-value pairs are not specified then all documents are retrieved
@@ -144,50 +144,33 @@ class ElasticsearchClient:
                 key: Only retreive documents with selected key
         '''
         query = self.__build_query(where, values, func="match")
-        _results  = self.conn.search(index=self.index, body=query)
+        _results  = self.conn.search(index=self.index, query=query, size=size)
         results = self.__process_result(_results)
         return results
 
-    def format_doc(self, doc):
-        """
-            Format the document to be inserted into the index
-        """
-        _doc = {"field":[]}
-
-        for key, val in doc.items():
-            if key in ['title','body','abstract']:
-                _doc[key] = val
-            else:
-                field = {"field_uid": key,"value": val}
-                _doc["field"].append(field)
-        return _doc
-
-
-    def load(self, datapath):
+    def load(self, data=None, generator=None):
         '''
-            Bulk load all the data into index
+            Bulk load all the data into index either from a list of data or from a generator
             @params:
                 data: data
+                generator: generator of data
         '''
-        generator = self.__generator(datapath)
+        generator = self.__generator(data) if not generator else generator
         try:
             helpers.bulk(self.conn, generator, self.index)
             print("Data loading successfull")
         except ElasticsearchException as err:
             print("Error === ", err)
 
-    def __generator(self, datapath):
+    def __generator(self, data):
         '''
             Returns a single line of data without loading document into memory
             @params:
                 data:   list of data
         '''
-        # Load data from JSON file
-        with open(datapath, encoding="utf-8") as file:
-            data = file.read()
-            data = "[" + data.replace("}{", "},{") + "]"
-            for doc in data:
-                yield {
-                    "_index": self.index,
-                    "_source": self.format_doc(doc)
-                }
+        for doc in data:
+            yield {
+                "_id": uuid.uuid4(),
+                "_index": self.index,
+                "_source": doc
+            }
