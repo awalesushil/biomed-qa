@@ -48,3 +48,11 @@ body {
     font-weight: bold !important;
     background-color: lightgreen !important;
 }
+
+.meta-info {
+    color: darkgreen;
+}
+
+.read-more {
+    padding-left: 0;
+}
