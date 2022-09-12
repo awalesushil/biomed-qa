@@ -1,8 +1,13 @@
 <div class="row my-5">
     <div class="col-md-12">
         {% for each in data.results %}
-            <a href=""><h3 class="display-title">{{ each.title }}</h3></a>
-            <p class="display-text">{{ each.passage }}</p>
+            <a href=""><h4 class="display-title">{{ each.title }}</h4></a>
+            <p>
+                {% for author in each.authors %}
+                    <i>{{ author.name }},</i>
+                {% endfor %}
+            </p>
+            <p class="display-text">{{ each.body }}</p>
         {% endfor %}
     </div>
 </div>

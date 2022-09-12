@@ -6,26 +6,32 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from sentence_transformers import SentenceTransformer
-
 from biomedqa.queryformulators.queryformulator import QueryFormulator
 from biomedqa.retrievers.retriever import Retriever
 from biomedqa.qamodels.qamodel import QAModel
+from biomedqa.retrievers.hnswlib import HNSWlibRetriever
+
+from sentence_transformers import SentenceTransformer
+
+passage_model = SentenceTransformer("msmarco-bert-base-dot-v5")
+retriever_model = HNSWlibRetriever(num_elements=50130, dimension=768, path="/code/app/hnswlib_index.bin")
+# retriever_model.load()
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="/code/app/static"), name="static")
 
-passage_model = SentenceTransformer("msmarco-bert-base-dot-v5")
+queryForumulator = QueryFormulator()
+retriever = Retriever(
+    model= retriever_model,
+    passage_model=passage_model)
+qamodel = QAModel()
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     """
         Home page
     """
-    queryForumulator = QueryFormulator()
-    retriever = Retriever(passage_model)
-    qamodel = QAModel()
 
     params = request.query_params
     if params:
