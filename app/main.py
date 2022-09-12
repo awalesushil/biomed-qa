@@ -9,22 +9,13 @@ from fastapi.templating import Jinja2Templates
 from biomedqa.queryformulators.queryformulator import QueryFormulator
 from biomedqa.retrievers.retriever import Retriever
 from biomedqa.qamodels.qamodel import QAModel
-from biomedqa.retrievers.hnswlib import HNSWlibRetriever
-
-from sentence_transformers import SentenceTransformer
-
-passage_model = SentenceTransformer("msmarco-bert-base-dot-v5")
-retriever_model = HNSWlibRetriever(num_elements=50130, dimension=768, path="/code/app/hnswlib_index.bin")
-# retriever_model.load()
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="/code/app/static"), name="static")
 
 queryForumulator = QueryFormulator()
-retriever = Retriever(
-    model= retriever_model,
-    passage_model=passage_model)
+retriever = Retriever()
 qamodel = QAModel()
 
 @app.get("/", response_class=HTMLResponse)

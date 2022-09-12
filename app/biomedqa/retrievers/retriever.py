@@ -6,14 +6,13 @@ import json
 from sentence_transformers import util
 
 from biomedqa.retrievers.elasticsearchclient import ElasticsearchClient
-from biomedqa.retrievers.hnswlib import HNSWlibRetriever
 
 
 class Retriever:
     """
         Retrieve passages from the index
     """
-    def __init__(self, model, passage_model=None):
+    def __init__(self, model=None, passage_model=None):
         with open("/code/app/config.json", encoding="utf-8") as config:
             config = json.load(config)
             self.conn = ElasticsearchClient(config)
@@ -46,12 +45,9 @@ class Retriever:
 
         return titles, passages
 
-    def get_passages(self, query):
+    def get_passages(self, query, top_k=10):
         """
             Retrieve passages from the index
         """
-        # hits = self.conn.search(where=["title","body"], values=[query]*2)
-        query_embedding = self.passage_model.encode([query])
-        labels, _ = self.model.search(query_embedding)
-        passages = [self.conn.get(label)['_source'] for label in labels[0]]
-        return passages
+        passages = self.conn.search(where=["body"], values=[query])
+        return passages[:top_k]

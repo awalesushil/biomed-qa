@@ -90,7 +90,7 @@ class Extractor:
         """
             Extract text from PMC text dump
         """
-        index_id = 5001
+        index_id = 250000
         folders = os.listdir(self.path)
         for folder in folders:
             for file in tqdm(os.listdir(os.path.join(self.path, folder))[:200]):
