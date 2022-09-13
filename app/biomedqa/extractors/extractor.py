@@ -57,10 +57,16 @@ class Extractor:
         if history:
             for date in history.find_all('date'):
                 if date and date.attrs['date-type'] == 'accepted':
-                    date_str = date.year.text + '-' + date.month.text + '-' + date.day.text
-                    date_str = datetime.strptime(date_str, "%Y-%m-%d").date()
-                    return date_str.isoformat()
-        return datetime.strptime('1900-01-01', "%Y-%m-%d").date().isoformat()
+                    try:
+                        date_str = date.year.text + '-' + date.month.text + '-' + date.day.text
+                        date_str = datetime.strptime(date_str, "%Y-%m-%d").date()
+                        return date_str.isoformat()
+                    except AttributeError:
+                        pass
+        try:
+            return datetime.strptime('1900-01-01', "%Y-%m-%d").date().isoformat()
+        except ValueError:
+            return None
 
     def __extract_categories(self, categories):
         """
@@ -79,9 +85,12 @@ class Extractor:
             Extract metadata from XML file
         """
         metadata_dict = {}
-        metadata_dict['title'] = metadata.find('article-title').text
+        try:
+            metadata_dict['title'] = metadata.find('article-title').text
+            metadata_dict['journal_title'] = metadata.find('journal-title').text
+        except AttributeError:
+            pass
         metadata_dict['categories'] = self.__extract_categories(metadata.find('article-categories'))
-        metadata_dict['journal_title'] = metadata.find('journal-title').text
         metadata_dict['authors'] = self.___extract_authors(metadata.find('contrib-group'))
         metadata_dict['publication_date'] = self.__extract_date(metadata.find('history'))
         return metadata_dict
@@ -90,7 +99,7 @@ class Extractor:
         """
             Extract text from PMC text dump
         """
-        index_id = 250000
+        index_id = 1000
         folders = os.listdir(self.path)
         for folder in folders:
             for file in tqdm(os.listdir(os.path.join(self.path, folder))[:200]):

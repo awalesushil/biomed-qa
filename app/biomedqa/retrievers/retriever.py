@@ -27,27 +27,20 @@ class Retriever:
         passages = self.passage_model.encode(passages, show_progress_bar=False)
         return passages
 
-    def tokenize(self, docs, passage_length=5):
-        """
-            Tokenize the passages
-        """
-        passages = []
-
-        for doc in docs:
-            title = doc["title"]
-            full_text = doc["abstract"] + " " + doc["body"]
-            sentences = full_text.split(".")
-            passages.extend([(title, " ".join(sentences[i:i+passage_length])) \
-                for i in range(0, len(sentences), passage_length)])
-
-        titles = [p[0] for p in passages]
-        passages = [p[1] for p in passages]
-
-        return titles, passages
-
     def get_passages(self, query, top_k=10):
         """
             Retrieve passages from the index
         """
-        passages = self.conn.search(where=["body"], values=[query])
-        return passages[:top_k]
+
+        top_j = 100 # Get top j passages from the index using BM25
+        hits = self.conn.search(where=["body"], values=[query], size=top_j)
+
+        # Encode the passages
+        encoded_passages = self.encode_passages([hit["body"] for hit in hits])
+        encoded_query = self.encode_passages([query])
+
+        # Compute cosine similarity between query and passages
+        docs = util.semantic_search(encoded_query, encoded_passages, top_k=top_k)[0]
+        passages = [hits[doc["corpus_id"]] for doc in docs]
+
+        return passages

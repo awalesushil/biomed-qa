@@ -10,12 +10,15 @@ from biomedqa.queryformulators.queryformulator import QueryFormulator
 from biomedqa.retrievers.retriever import Retriever
 from biomedqa.qamodels.qamodel import QAModel
 
+from sentence_transformers import SentenceTransformer
+passage_model = SentenceTransformer("msmarco-bert-base-dot-v5")
+
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="/code/app/static"), name="static")
 
 queryForumulator = QueryFormulator()
-retriever = Retriever()
+retriever = Retriever(passage_model=passage_model)
 qamodel = QAModel()
 
 @app.get("/", response_class=HTMLResponse)
