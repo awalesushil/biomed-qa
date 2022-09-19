@@ -32,15 +32,20 @@ class Retriever:
             Retrieve passages from the index
         """
 
-        top_j = 100 # Get top j passages from the index using BM25
-        hits = self.conn.search(where=["body"], values=[query], size=top_j)
+        if self.model:
+            encoded_query = self.encode_passages([query])
+            labels, _ = self.model.search(encoded_query, top_k=top_k)
+            passages = [self.conn.get(label)['_source'] for label in labels[0]]
+        else:
+            top_j = 100 # Get top j passages from the index using BM25
+            hits = self.conn.search(where=["body"], values=[query], size=top_j)
 
-        # Encode the passages
-        encoded_passages = self.encode_passages([hit["body"] for hit in hits])
-        encoded_query = self.encode_passages([query])
+            # Encode the passages
+            encoded_passages = self.encode_passages([hit["body"] for hit in hits])
+            encoded_query = self.encode_passages([query])
 
-        # Compute cosine similarity between query and passages
-        docs = util.semantic_search(encoded_query, encoded_passages, top_k=top_k)[0]
-        passages = [hits[doc["corpus_id"]] for doc in docs]
+            # Compute cosine similarity between query and passages
+            docs = util.semantic_search(encoded_query, encoded_passages, top_k=top_k)[0]
+            passages = [hits[doc["corpus_id"]] for doc in docs]
 
         return passages

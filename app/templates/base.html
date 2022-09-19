@@ -10,7 +10,7 @@
     <meta name="author" content="Sushil Awale">
 
     <title>{% block title %}{% endblock %} </title>
-    <link rel="icon" href="{{ url_for('static', path='/images/favicon.png') }}" sizes="32x32" />
+    <link rel="icon" href="{{ url_for('static', path='favicon.png') }}" sizes="32x32" />
 
     <!-- Bootstrap CSS CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
@@ -25,19 +25,33 @@
 
 <body>
     {% include 'include/topnav.html' %}
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-2"></div>
-            <div class="col-md-8">
-                {% include 'include/searchbar.html' %}
+    {% if data.confirm %}
+        <div class="container">
+            <div class="row mt-5 mb-66">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                          <h5 class="card-title">Thank you! Your response has been recorded.</h5>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-2"></div>
         </div>
-        {% if data.query|length > 0 %}
-        {% include 'include/results.html' %}
-        {% endif %}
-    </div>
-
+    {% else %}
+        {% include 'include/searchbar.html' %}
+        <div class="container mt-5">
+            {% if data.query|length > 0 %}
+                {% if data.evaluate %}
+                    {% include 'include/evaluate.html' %}
+                {% else %}
+                    {% include 'include/results.html' %}
+                {% endif %}
+            {% else %}
+                {% include 'include/examples.html' %}
+            {% endif %}
+        </div>
+    {% endif %}
+    {% include 'include/footer.html' %}
     {% block scripts %}
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -52,25 +66,6 @@
     <!-- jQuery Custom Scroller CDN -->
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $("#sidebar").mCustomScrollbar({
-                theme: "minimal"
-            });
-
-            $('#dismiss, .overlay').on('click', function () {
-                $('#sidebar').removeClass('active');
-                $('.overlay').removeClass('active');
-            });
-
-            $('#sidebarCollapse').on('click', function () {
-                $('#sidebar').addClass('active');
-                $('.overlay').addClass('active');
-                $('.collapse.in').toggleClass('in');
-                $('a[aria-expanded=true]').attr('aria-expanded', 'false');
-            });
-        });
-    </script>
     {% if data.query|length == 0 %}
         <script type="text/javascript">
 

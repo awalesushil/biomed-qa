@@ -1,6 +1,10 @@
 <!-- Image and text -->
-<nav class="navbar navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">
-      BioMedQA
-    </a>
+<nav class="navbar navbar-dark sticky-top bg-dark">
+      <a class="navbar-brand" href="/">
+        <img src="/static/favicon.png">
+        BioMed QA
+      </a>
+      {% if data.query|length > 0 %}
+        <a href="/?evaluate=true&query={{ data.query }}" class="btn btn-success">Evaluate</a>
+      {% endif %}
   </nav>
