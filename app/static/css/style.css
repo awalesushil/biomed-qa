@@ -2,11 +2,35 @@ body {
     background-color: aliceblue;
 }
 
+.navbar {
+    min-height: 66px;
+}
+
+.footer {
+    margin-top: 5%;
+    min-height: 52px;
+}
+
+.transparent {
+    background-color: aliceblue;
+}
+
+.center {
+    align-content: center;
+}
+
+.questions {
+    margin-bottom: 30%;
+}
+
+.mb-66 {
+    margin-bottom: 66%;
+}
+
 #search-bar-wrapper {
     display: flex;
     min-height: 52px;
-    margin: 10rem auto;
-    position: relative;
+    margin: 10rem auto 0 auto;
 }
 
 #search-bar-wrapper-up {
@@ -22,7 +46,7 @@ body {
 
 #query {
     background-size: 24px;
-    padding-inline-start: 52px;
+    padding-inline-start: 25px;
     padding-inline-end: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
     border: 1px solid transparent;
@@ -55,4 +79,12 @@ body {
 
 .read-more {
     padding-left: 0;
+}
+
+.main {
+
+}
+
+.about {
+
 }

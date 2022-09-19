@@ -1,5 +1,13 @@
-<form action="" autocomplete="off" method="GET">
-    <div class="input-group" id="search-bar-wrapper">
-        <input id="query" type="text" class="form-control" name="query" placeholder="{%if data %}{{data.query}}{%endif%}">
+<nav class="navbar sticky-top mt-5">
+    <div class="container">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+            <form action="" autocomplete="off" method="GET">
+                <div class="input-group" id="search-bar-wrapper">
+                    <input id="query" type="text" class="form-control searchbar" name="query" placeholder="{%if data %}{{data.query}}{%endif%}">
+                </div>
+            </form>
+        </div>
+        <div class="col-md-2"></div>
     </div>
-</form>
+</nav>
