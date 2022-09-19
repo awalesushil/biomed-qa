@@ -80,7 +80,7 @@ class ElasticsearchClient:
             print("Exception === ", err)
 
 
-    def __build_query(self, keys=None, values=None, func=None):
+    def __build_query(self, keys=None, values=None, func=None, fuzzy=False):
 
         if keys is not None:
 
@@ -108,7 +108,18 @@ class ElasticsearchClient:
                         match
                     )
                 else:
-                    match = {func: {key: val}}
+                    if fuzzy:
+                        match = {
+                            func: {
+                                key: {
+                                    "query": val,
+                                    "fuzziness": 2,
+                                    "prefix_length": 1
+                                }
+                            }
+                        }
+                    else:
+                        match = {func: {key:val}}
                     query['bool']['must'].append(match)
         else:
             query = {"match_all":{}}
@@ -143,7 +154,7 @@ class ElasticsearchClient:
                 values: List of values for the selected fields
                 key: Only retreive documents with selected key
         '''
-        query = self.__build_query(where, values, func="match")
+        query = self.__build_query(where, values, func="match", fuzzy=True)
         _results  = self.conn.search(index=self.index, query=query, size=size)
         results = self.__process_result(_results)
         return results
