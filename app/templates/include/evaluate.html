@@ -1,0 +1,61 @@
+<div class="row">
+    <div class="col-md-12">
+        <form action="/confirm" autocomplete="off" method="GET">
+            <input type="hidden" name="question" value="{{ data.query }}">
+            <input type="hidden" name="confirm" value="true">
+            {% set rank = namespace(value=0) %}
+            {% for each in data.passages %}
+                <a href="https://pubmed.ncbi.nlm.nih.gov/{{ each.pid }}/" target="_blank">
+                    <h5 class="display-title">{{ each.title }}</h5>
+                </a>
+                <p class="meta-info">
+                    {% for author in each.authors %}
+                        <i>{{ author.name }},</i>
+                    {% endfor %}
+                    {% if each.publication_date %}
+                        {% set year = each.publication_date.split("-")[0] %}
+                        {% if year != '1900' %}
+                            {{ year }} -
+                        {% endif %}
+                    {% endif %}
+                    <strong> {{ each.journal_title }} </strong>
+                </p>
+                <h6><strong>Context</strong></h6>
+                <p>
+                    <span class="display-text">
+                        {{each.body}} <br/>
+                    </span>{%if each.body|length > 400 %}<button class="btn btn-link read-more" onclick="toggleRead(this)">Read more</button> {%endif%}
+                </p>
+                <h6>
+                    <strong> Answer </strong> <em>{{ data.answers[loop.index-1] }}</em>
+                </h6>
+                <div class="mx-auto">
+                    {% for option in ['Not-relevant', 'Relevant'] %}
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="{{ rank.value|string + option }}" name="{{ rank.value }}" value="{{ option }}" class="custom-control-input">
+                            <label class="custom-control-label" for="{{ rank.value|string + option }}">{{option}}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <hr/>
+                {% set rank.value = rank.value + 1 %}
+            {% endfor %}
+            <input type="submit" class="btn btn-primary" value="Submit">
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function toggleRead(element) {
+        var text = element.previousSibling;
+        if (text.style.maxHeight){
+            text.style.maxHeight = null;
+            text.classList.add("display-text");
+            element.innerHTML = "Read more";
+        } else {
+            text.style.maxHeight = text.scrollHeight + "px";
+            text.classList.remove("display-text");
+            element.innerHTML = "Read less";
+        }
+    }
+</script>
