@@ -1,8 +1,15 @@
 """
     Query Formulator Model
 """
-class QueryFormulator:
+import re
+import contractions
 
+import spacy
+from scispacy.abbreviation import AbbreviationDetector
+from difflib import SequenceMatcher
+
+
+class QueryFormulator:
     """
         Query Formulator Model
     """
@@ -12,16 +19,13 @@ class QueryFormulator:
         self.parser = parser # Dependency parsing and sentence tokenization
 
         self.stopWords = stopWords
-    
 
-    
-    
     def clean_sentence(self, sentence):
-      fixed_conts = contractions.fix(sentence) # Use contractions module to remove contractions and conjunctions
-      finalSentence = re.sub(r'[!#$%&\()*+,.;<>?@[\]^_{|}~]', '', fixed_conts.lower()) # Remove some specific punctuations  and lower the sentence
-      finalSentence = re.sub(' +', ' ', finalSentence) # Remove possible double spaces
+        fixed_conts = contractions.fix(sentence) # Use contractions module to remove contractions and conjunctions
+        finalSentence = re.sub(r'[!#$%&\()*+,.;<>?@[\]^_{|}~]', '', fixed_conts.lower()) # Remove some specific punctuations  and lower the sentence
+        finalSentence = re.sub(' +', ' ', finalSentence) # Remove possible double spaces
 
-      return finalSentence     
+        return finalSentence     
 
 
     def get_medical_Entities(self, sentence_str):

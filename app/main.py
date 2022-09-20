@@ -5,11 +5,15 @@ import os
 import json
 from datetime import datetime
 
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+import spacy
+from scispacy.abbreviation import AbbreviationDetector
+
+from stopwords import stopwords
 from biomedqa.queryformulators.queryformulator import QueryFormulator
 from biomedqa.retrievers.retriever import Retriever
 from biomedqa.qamodels.qamodel import QAModel
@@ -18,6 +22,15 @@ from biomedqa.qamodels.qamodel import QAModel
 from sentence_transformers import SentenceTransformer
 passage_model = SentenceTransformer("msmarco-MiniLM-L6-cos-v5")
 retriever = Retriever(passage_model=passage_model)
+
+
+# Load Query Formulator Model
+nlp_medical = spacy.load("en_core_sci_lg")
+nlp_medical.add_pipe("abbreviation_detector")
+nlp = spacy.load("en_core_web_md")
+
+queryFormulator = QueryFormulator(nlp_medical, nlp, set(stopwords))
+
 
 # Load QA model
 from transformers import AutoTokenizer,AutoModelForQuestionAnswering
@@ -29,8 +42,6 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="/code/app/static"), name="static")
 
-queryForumulator = QueryFormulator()
-
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     """
@@ -39,10 +50,12 @@ async def home(request: Request):
     params = request.query_params
 
     if params:
-        query = params.get("query").lower()
         evaluate = params.get("evaluate", None)
-        # keywords = queryFormulator.get_keywords(query
-        passages = retriever.get_passages(query)
+        query = params.get("query").lower()
+        print(query)
+        keywords = queryFormulator.buildQuery(query)
+        print(keywords)
+        passages = retriever.get_passages(keywords)
         answers = qa_model.get_answers(query, passages)
 
         data = {
