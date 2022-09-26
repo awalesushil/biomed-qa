@@ -99,9 +99,9 @@ class QueryFormulator:
       else:
         # 1.2) Check if there is something to be matched https://www.pythonpip.com/python-tutorials/how-to-find-string-in-list-python/ --> worked better than regex matching
         longCnadidates = string1.split(' ')
-        shortCandidates = string2.split(' ') if len(string2) > 1 else ['$$$$']
+        shortCandidates = string2.split(' ') if len(string2) > 1 and string2.isalnum() else ['$$$$']
 
-        totalMatches = len([s for s in longCnadidates if any(xs in s for xs in shortCandidates)])
+        totalMatches = len([s for s in longCnadidates if any(xs in s for xs in shortCandidates)]) / len(longCnadidates) 
 
         # No match: --> then return the original entity
         if totalMatches == 0:                  
@@ -201,7 +201,7 @@ class QueryFormulator:
         matches = 0  # To track if no match is done
         intermediate = dict() # Link match to chunk
 
-        if medLen == chnkLen == 1: # Trick to be able to iter when both lists just contain one item
+        if medLen == 1 and chnkLen == 1: # Trick to be able to iter when both lists just contain one item
           singleWord = medical[0]
           bigList = chunks
         
@@ -215,7 +215,7 @@ class QueryFormulator:
           cands, totalMatches  = self.expandEntities(word, singleWord)
           
           if totalMatches > 0:            
-            intermediate[singleWord] = [totalMatches, cands] 
+            intermediate[word] = [totalMatches, cands] 
             matches += 1   
               
         bestCand, deleteChunk = self.getBestMatch(matches, intermediate)
