@@ -160,10 +160,11 @@ class QueryFormulator:
           chunkToDelete = list(intermediateDict.keys())[0]
         
         else:
-          bestCand = myList.sort(key=lambda item:item[0])   
-          expandedEntity = bestCand([0][0]) # --> Get just the entity that was previously stored in intermediateDict    
-          chunkToDelete = list(intermediateDict.keys())[myList.index(bestCand[0][0])] # --> Get the name of the original chunk
-        
+          bestCand = sorted(myList, key=lambda item:item[0], reverse= True)  
+          groupCand = bestCand[0] # [value, expandedEntity]
+          
+          chunkToDelete = list(intermediateDict.keys())[myList.index(groupCand)] # --> Get the name of the original chunk
+          expandedEntity = groupCand[-1] # --> Get just the entity that was previously stored in intermediateDict      
         
         return expandedEntity, chunkToDelete
 
@@ -177,6 +178,11 @@ class QueryFormulator:
     def loopOfExpansion(self, medical, chunks):
 
       finalList = []
+      
+      # Delete if there are empty entris
+      medical = [med for med in medical if med]
+      chunks = [chnk for chnk in chunks if chnk]
+      
 
       # If there are no medical or noun chunks, return the opposite one
       if type(medical) == type(None):
@@ -306,4 +312,4 @@ class QueryFormulator:
       finalSentence = (' ').join([word for word in sentenceStr.split(' ') if word in self.flattenCandidates(list(finalCanditates) + extendedEntities)])
       finalSentence = re.sub(' +', ' ', finalSentence)
       
-      return finalSentence
+      return str(finalSentence)
