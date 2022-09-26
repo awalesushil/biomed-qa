@@ -27,6 +27,8 @@ retriever = Retriever(passage_model=passage_model)
 # Load Query Formulator Model
 nlp_medical = spacy.load("en_core_sci_lg")
 nlp_medical.add_pipe("abbreviation_detector")
+
+spacy.cli.download("en_core_web_md")
 nlp = spacy.load("en_core_web_md")
 
 queryFormulator = QueryFormulator(nlp_medical, nlp, set(stopwords))

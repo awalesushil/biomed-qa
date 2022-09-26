@@ -20,7 +20,6 @@ email-validator==1.2.1
 scispacy==0.5.1
 spacy==3.4.1
 en-core-sci-lg @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.1/en_core_sci_lg-0.5.1.tar.gz
-en-core-web-md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.3.0/en_core_web_md-3.3.0-py3-none-any.whl
 fastapi==0.78.0
 filelock==3.7.1
 h11==0.13.0
