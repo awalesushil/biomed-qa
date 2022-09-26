@@ -38,7 +38,7 @@ class Retriever:
             passages = [self.conn.get(label)['_source'] for label in labels[0]]
         else:
             top_j = 100 # Get top j passages from the index using BM25
-            hits = self.conn.search(where=["body"], values=[query], size=top_j)
+            hits = self.conn.search(where=["title","body"], values=[query, query], size=top_j)
 
             # Encode the passages
             encoded_passages = self.encode_passages([hit["body"] for hit in hits])
