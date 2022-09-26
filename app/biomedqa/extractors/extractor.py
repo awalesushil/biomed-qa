@@ -63,6 +63,8 @@ class Extractor:
                         return date_str.isoformat()
                     except AttributeError:
                         pass
+                    except ValueError:
+                        pass
         try:
             return datetime.strptime('1900-01-01', "%Y-%m-%d").date().isoformat()
         except ValueError:
