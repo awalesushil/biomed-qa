@@ -56,13 +56,21 @@ async def home(request: Request):
         evaluate = params.get("evaluate", None)
         query = params.get("query").lower()
         keywords = queryFormulator.buildQuery(query)
-        passages = retriever.get_passages(keywords, top_k=30)
-        answers = qa_model.get_answers(query, passages)
+        _passages = retriever.get_passages(keywords, top_k=50)
+        _answers = qa_model.get_answers(query, _passages)
+        
+        passages, answers = [], []
+
+        # Filter non-answers
+        for i, ans in enumerate(_answers):
+            if ans and not ans.startswith("[CLS]"):
+                passages.append(_passages[i])
+                answers.append(_answers[i])
 
         data = {
             "query": query,
-            "passages": passages,
-            "answers": answers,
+            "passages": passages[:5] if len(passages) > 5 else passages,
+            "answers": answers[:5] if len(answers) > 5 else answers,
             "evaluate": evaluate
         }
 

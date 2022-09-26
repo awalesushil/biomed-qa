@@ -1,5 +1,6 @@
 <div class="row">
     <div class="col-md-12">
+        {% if data.passages|length > 0 %}
         <form action="/confirm" autocomplete="off" method="GET">
             <input type="hidden" name="question" value="{{ data.query }}">
             <input type="hidden" name="confirm" value="true">
@@ -42,6 +43,9 @@
             {% endfor %}
             <input type="submit" class="btn btn-primary" value="Submit">
         </form>
+        {% else %}
+           <h3> No answers found. </h3>
+        {% endif %}
     </div>
 </div>
 
