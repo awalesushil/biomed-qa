@@ -3,6 +3,7 @@
 """
 import os
 import json
+import random
 from datetime import datetime
 
 from fastapi import FastAPI, Request
@@ -13,7 +14,7 @@ from fastapi.templating import Jinja2Templates
 import spacy
 from scispacy.abbreviation import AbbreviationDetector
 
-from stopwords import stopwords
+from resources import stopwords, questions
 from biomedqa.queryformulators.queryformulator import QueryFormulator
 from biomedqa.retrievers.retriever import Retriever
 from biomedqa.qamodels.qamodel import QAModel
@@ -67,7 +68,10 @@ async def home(request: Request):
 
         return templates.TemplateResponse("index.html", {"request": request, "data": data})
     else:
-        return templates.TemplateResponse("index.html", {"request": request, "data": {"query": ""}})
+        data = {
+            "questions": random.sample(questions, 5)
+        }
+        return templates.TemplateResponse("index.html", {"request": request, "data": data})
 
 
 @app.get("/confirm", response_class=HTMLResponse)

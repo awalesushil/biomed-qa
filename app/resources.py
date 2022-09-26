@@ -231,3 +231,21 @@ stopwords = [
 "'s",
 "'ve"
 ]
+
+questions = [
+    "Which fusion protein is involved in the development of Ewing sarcoma?",
+    "What are osteocytes? ",
+    "Which cell types are known to be driving Rheumatoid Arthritis?",
+    "Which are the common symptoms of Cushing's syndrome?",
+    "Which syndromes are associated with mutations in the EZH2 gene?",
+    "Which is the supplemental antioxidant in athletes?",
+    "Which signaling pathways have been associated with medulloblastoma formation and growth?",
+    "List proteins of lipids droplets",
+    "What is the treatment of acute myocarditis?",
+    "Do archaeal genomes contain one or multiple origins of replication?",
+    "Which is the most known bacterium responsible for botulism",
+    "What is oprozomib?",
+    "Which is the most common cause of sudden cardiac death in young athletes?",
+    "Which is the gene mutated in type 1 neurofibromatosis?",
+    "What is an endoscopic retrograde cholangiopancreatography?"
+]
