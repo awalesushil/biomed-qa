@@ -20,9 +20,18 @@
             <p>
                 <span class="display-text">
                     {{each.body}} <br/>
-                </span>{%if each.body|length > 450 %}<button class="btn btn-link read-more" onclick="toggleRead(this)">Read more</button> {%endif%}
+                </span>{%if each.body|length > 450 %}<span class="btn btn-link read-more" onclick="toggleRead(this)">Read more</span> {%endif%}
             </p>
-            <h6><strong> Answer </strong> <em>{{ data.answers[loop.index-1] }}</em></h6>
+            <h6>
+                <strong> Answer </strong> 
+                <em>
+                    {%if data.answers[loop.index-1] == "[CLS]" %}
+                        Not Found
+                    {%else%}
+                        {{ data.answers[loop.index-1] }}
+                    {%endif%}
+                </em>
+            </h6>
             <hr/>
         {% endfor %}
     </div>
