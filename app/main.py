@@ -53,7 +53,7 @@ async def home(request: Request):
         evaluate = params.get("evaluate", None)
         query = params.get("query").lower()
         keywords = queryFormulator.buildQuery(query)
-        passages = retriever.get_passages(keywords)
+        passages = retriever.get_passages(keywords, top_k=30)
         answers = qa_model.get_answers(query, passages)
 
         data = {
