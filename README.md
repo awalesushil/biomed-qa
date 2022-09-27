@@ -2,35 +2,60 @@
 
 This Master's project is part of the module **Web-interface for Langugage Processing Systems** in M.Sc. Intelligent Adaptive Systems. We build a biomedical question answering system that is composed of the following components:
 
-* An **Text Extractor** that extracts full body text from PubMed text dump
+* An **Text Extractor** that extracts passages from the XML file of a research article. The XML data dump is taken from [PubMed Open Access Non-Commercial Data Dump](https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_bulk/oa_comm/xml/)
+    
 * A **Query Formulation** module composed of BioMedical Named Entity Recognition model to extract keywords from the user's natural language questions
-* An **Information Retrieval** module built using Elasticsearch to retrieve relevant passages from the PubMed text
+
+* An **Passage Retrieval** module built using Elasticsearch to retrieve relevant passages from the PubMed text
+
 * A **Question Answering** model that uses BioBert fine-tuned on SQuAD dataset to retrieve answers from the passages
 
 ## System Architecture
 
-![Image](arch.png)
+![Image](images/arch.png)
 
 ## Running the system
 
-1. Install Docker
-2. Run the following command
+**Prerequisite**: Docker installed
 
-* For first time, 
+1. Run the following command
     
     `docker-compse up --build`
-* For other times, 
-    
-    `docker-compse up`
 
-3. Load the data by running
+The system can be accessed at [http://0.0.0.0:8000](http://0.0.0.0:8000). The following is the screenshot of the landing page.
 
-    `docker exec -it *container_id* python3 retriever/load.py`
+![Image](images/landing_page.png)
 
-    *Note: the `container_id` can be found by running `docker container ls`. It's the one with name `biomedqa-web`*
-
-    *Note: the data should be in the retriever folder named `data.json`*
-
-4. Use `Ctrl+C` to shutdown, then
+2. Use `Ctrl+C` to shutdown, then
 
     `docker-compose down`
+
+## Loading data
+
+**Prerequisite**: Download the PubMed XML data dumps from the above link
+
+The `loader_script.py` needs to run from outside the docker container since the data is not copied into docker context.
+
+1. Create a Python environment and install all dependencies.
+
+    `python3 -m venv .env`
+
+    `source .env/bin/activate`
+
+    `pip3 install -r requirements.txt`
+
+2. Load the data by running `loader_script.py`. This file can be modified to load the data into **HNSWLib Index** as well.
+
+    `python3 app/loader_script.py`
+
+## Question Answering
+
+The user can now directly type in a medical question in natural language on the search input section. The system will display upto five passages with answers to the question highlighted in a separate section. 
+
+![Image](images/answer.png)
+
+## Evaluation
+
+The quality of the question answering system can also be evaluated by pressing the `Evaluate` button for each query individually. The user is provided with the option to mark each answer as `Relevant` or `Not-relevant`. The responses are stored in the system as JSON files.
+
+![Image](images/evaluate.png)
