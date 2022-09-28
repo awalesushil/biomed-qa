@@ -22,7 +22,7 @@ class QueryFormulator:
 
     def clean_sentence(self, sentence):
         fixed_conts = contractions.fix(sentence) # Use contractions module to remove contractions and conjunctions
-        finalSentence = re.sub(r'[!#$%&\()*+,.;<>?@[\]^_{|}~]', '', fixed_conts.lower()) # Remove some specific punctuations  and lower the sentence
+        finalSentence = re.sub(r'[!#$%&\*+,.;<>?@[\]^_{|}~]', '', fixed_conts.lower()) # Remove some specific punctuations  and lower the sentence
         finalSentence = re.sub(' +', ' ', finalSentence) # Remove possible double spaces
 
         return finalSentence     
@@ -51,9 +51,35 @@ class QueryFormulator:
                 medicalEntities = medicalEntities[:i] + [longV] + medicalEntities[i:]
             except KeyError:
                 pass
-          
-
+        
+        medicalEntities = self.shortenList(medicalEntities)         
         return medicalEntities
+    
+    
+     # Delete repeated elements if they were expanded via the abbreviations
+    def shortenList(self, medicalEntities):
+
+
+      finalMedical = list()
+      totalElements = len(medicalEntities)
+
+
+      for i in range(totalElements):
+
+        element = medicalEntities[i]
+        counter = 0
+
+        subList = medicalEntities[:i] + medicalEntities[i+1:]
+
+        for subEl in subList:
+          if element in subEl: counter = 1
+        
+        
+        if counter == 0:
+          finalMedical.append(element)
+      
+
+      return finalMedical
       
 
     def get_noun_chunks(self, sentence_parsed):
@@ -310,6 +336,6 @@ class QueryFormulator:
 
       # 3) Build the final sentence 
       finalSentence = (' ').join([word for word in sentenceStr.split(' ') if word in self.flattenCandidates(list(finalCanditates) + extendedEntities)])
-      finalSentence = re.sub(' +', ' ', finalSentence)
+      finalSentence = re.sub(' +', ' ', re.sub('[()]', '', finalSentence)) # Remove the parenthesis and possible double (or more) white spaces
       
       return str(finalSentence)
