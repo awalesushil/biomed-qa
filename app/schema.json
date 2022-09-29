@@ -1,0 +1,37 @@
+{
+    "settings": {
+        "number_of_shards": 5,
+        "number_of_replicas": 1,
+        "index": {
+            "analysis": {
+                "analyzer": {
+                    "custom_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": [
+                            "lowercase",
+                            "custom_stopwords"
+                        ]
+                    }
+                },
+                "filter": {
+                    "custom_stopwords": {
+                        "type": "stop",
+                        "stopwords": "_english_"
+                    }
+                }
+            }
+        }
+    },
+    "mappings": {
+        "dynamic": false,
+        "properties": {
+            "title": {"type": "text", "analyzer": "custom_analyzer"},
+            "journal-title": {"type": "text"},
+            "authors": {"type": "nested"},
+            "categories": {"type": "nested"},
+            "publication-date": {"type": "date", "format": "yyyy-MM-dd"},
+            "body": {"type": "text", "analyzer": "custom_analyzer"}
+        }
+    }
+}

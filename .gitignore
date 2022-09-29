@@ -1,7 +1,7 @@
 .vscode/
 .env/
 __pycache__/
-*.json
 xml_data_dump/
 definitions/
 *.bin
+app/responses/
