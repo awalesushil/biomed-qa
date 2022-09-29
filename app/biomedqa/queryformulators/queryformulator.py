@@ -142,7 +142,6 @@ class QueryFormulator:
           return result, totalMatches 
 
         # Result --> The matched sequence or empty if no matching was done
-        # Tracker --> To add the original entity if no matching was done
         # TotalMatches --> Maybe one entity matches more than a chunk, we will keep the one with the most matches
 
 
@@ -304,6 +303,9 @@ class QueryFormulator:
           children = [child.text for child in token.children if child.text not in myFlattenEntities] # Only include the children which are not an entity/chunk
           candidatesOfInterest.extend(children)
           if token.text not in myFlattenEntities: wordsOfInterest.extend([token.text])   # Only include the children which are not an entity/chunk
+            
+          # HEAD:
+          if token.head.text not in myFlattenEntities: candidatesOfInterest.append(token.head.text)
                 
       finalCanditates = set(wordsOfInterest).union(set(candidatesOfInterest)) -  self.stopWords
 
