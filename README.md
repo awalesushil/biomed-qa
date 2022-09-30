@@ -6,9 +6,11 @@ This Master's project is part of the module **Web-interface for Langugage Proces
     
 * A **Query Formulation** module composed of BioMedical Named Entity Recognition model to extract keywords from the user's natural language questions
 
-* An **Passage Retrieval** module built using Elasticsearch to retrieve relevant passages from the PubMed text
+* An **Passage Retrieval** module to retrieve relevant passages from the PubMed text in two stage process
+    1. Retrieve top 100 passages using BM25 with Fuzzy search
+    2. Re-rank the passages based on cosine similarity scores between question embedding and passage embeddings. The embeddings were created using MiniLM model. [1] The top 50 passages are selected. 
 
-* A **Question Answering** model that uses BioBert fine-tuned on SQuAD dataset to retrieve answers from the passages
+* A **Question Answering** model that uses PubMedBert fine-tuned on SQuAD v.2 dataset [2] to retrieve answers from the passages
 
 ## Documentation
 
@@ -64,3 +66,16 @@ The user can now directly type in a medical question in natural language on the 
 The quality of the question answering system can also be evaluated by pressing the `Evaluate` button for each query individually. The user is provided with the option to mark each answer as `Relevant` or `Not-relevant`. The responses are stored in the system as JSON files.
 
 ![Image](images/evaluate.png)
+
+## References
+
+```
+[1] N. Reimers and I. Gurevych, “Sentence-bert: Sentence embeddings using siamese bert-networks,” in Proceedings of the
+2019 Conference on Empirical Methods in Natural Language Processing, Association for Computational Linguistics, 11
+2019.
+```
+```
+[2] Y. Gu, R. Tinn, H. Cheng, M. Lucas, N. Usuyama, X. Liu, T. Naumann, J. Gao, and H. Poon, “Domain-specific language
+model pretraining for biomedical natural language processing,” ACM Transactions on Computing for Healthcare (HEALTH),
+vol. 3, no. 1, pp. 1–23, 2021.
+```
