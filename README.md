@@ -10,6 +10,11 @@ This Master's project is part of the module **Web-interface for Langugage Proces
 
 * A **Question Answering** model that uses BioBert fine-tuned on SQuAD dataset to retrieve answers from the passages
 
+## Documentation
+
+- [Report](https://github.com/awalesushil/biomed-qa/blob/main/report.pdf)
+- [Slides](https://github.com/awalesushil/biomed-qa/blob/main/slides.pdf)
+
 ## System Architecture
 
 ![Image](images/arch.png)
